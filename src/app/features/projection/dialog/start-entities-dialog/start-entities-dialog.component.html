@@ -1,0 +1,35 @@
+<h1 mat-dialog-title>Start Entities</h1>
+
+<section class="input-wrapper">
+  <mat-form-field appearance="outline">
+    <mat-label>Entities</mat-label>
+    <input matInput type="number" min="1" [formControl]="entitiesCtrl" />
+  </mat-form-field>
+</section>
+
+<mat-divider></mat-divider>
+
+<section>
+  <h2 class="subtitle">Cycles</h2>
+  <app-cycles-table></app-cycles-table>
+</section>
+
+
+<mat-divider></mat-divider>
+
+<section >
+  <h2 class="subtitle">Events Projection</h2>
+  <app-projection-chart></app-projection-chart>
+</section>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="close()">Close</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="start()"
+    [disabled]="(store.selectedCycles$ | async)?.length === 0"
+  >
+    Start
+  </button>
+</mat-dialog-actions>
