@@ -137,5 +137,3 @@ O projeto utiliza ESLint para análise estática de código e Prettier para form
 - Adicionar persistência de estado (ex: `localStorage`) para manter as seleções do usuário entre sessões.
 
 ---
-
-_Este README foi adaptado do template padrão do Angular CLI e customizado para os requisitos do desafio._
