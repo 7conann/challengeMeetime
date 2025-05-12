@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { NgApexchartsModule, ChartComponent } from 'ng-apexcharts';
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -22,17 +22,46 @@ import { ProjectionStore } from '../../stores/projection.store';
 export class ProjectionChartComponent {
   private store = inject(ProjectionStore);
 
-  /** stream já inicializado com [] */
+  @ViewChild('chart') chart!: ChartComponent;
+
   series$: Observable<ApexAxisChartSeries> = this.store.chartSeries$.pipe(
     map((s) => (s ?? []) as ApexAxisChartSeries),
     startWith([] as ApexAxisChartSeries)
   );
 
-  labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
+  private getDynamicLabels(): string[] {
+    const dayNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+    const today = new Date();
+    const currentDayOfWeek = today.getDay();
 
-  chart:  ApexChart  = { type: 'bar', stacked: true, toolbar: { show: false } };
-  xaxis:  ApexXAxis  = { categories: this.labels };
-  yaxis:  ApexYAxis  = { title: { text: 'Events' } };
-  legend: ApexLegend = { position: 'bottom' };
-  tooltip:ApexTooltip= { y: { formatter: (v) => `${v} events` } };
+    let startIndexInWeekdays: number;
+
+    if (currentDayOfWeek === 0 || currentDayOfWeek === 6) {
+      startIndexInWeekdays = 0;
+    } else {
+      startIndexInWeekdays = currentDayOfWeek - 1;
+    }
+
+    const dynamicLabels: string[] = ['Hoje'];
+    for (let i = 1; i < 5; i++) {
+      const nextDayIndex = (startIndexInWeekdays + i) % 5;
+      dynamicLabels.push(dayNames[nextDayIndex]);
+    }
+    return dynamicLabels;
+  }
+
+  labels: string[] = this.getDynamicLabels();
+
+  chartOptions: ApexChart = { type: 'bar', stacked: true, toolbar: { show: false } };
+  xaxis: ApexXAxis = { categories: this.labels };
+  yaxis: ApexYAxis = {
+    title: {
+      text: 'Quantidade de eventos',
+      style: {
+        fontWeight: 'bold',
+        fontSize: '14px',
+      }
+    }
+  }; legend: ApexLegend = { position: 'bottom' };
+  tooltip: ApexTooltip = { y: { formatter: (v) => `${v} events` } };
 }

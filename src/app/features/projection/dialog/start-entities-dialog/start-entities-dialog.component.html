@@ -1,35 +1,62 @@
-<h1 mat-dialog-title>Start Entities</h1>
+<header class="modal-header">
+  <h1>Iniciar novas Entidades</h1>
+  <button mat-icon-button aria-label="Fechar">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
 
-<section class="input-wrapper">
-  <mat-form-field appearance="outline">
-    <mat-label>Entities</mat-label>
-    <input matInput type="number" min="1" [formControl]="entitiesCtrl" />
-  </mat-form-field>
+<section class="start-card">
+  <div class="card-left">
+    <h3>Entidades à iniciar</h3>
+    <p>
+      Após o início, os eventos serão disponibilizados para execução nos dias
+      que estão definidos em seus ciclos.
+    </p>
+  </div>
+
+  <div class="card-right">
+    <div class="card-input">
+      <mat-icon class="play-btn">play_arrow</mat-icon>
+      <input matInput type="number" min="1" [max]="maxEntities" [formControl]="entitiesCtrl"
+        aria-label="Quantidade de entidades" (input)="updateEntities($event)" />
+
+      <p class="entities-label">Entidades</p>
+
+    </div>
+    <span class="badge">
+      Novos eventos para hoje:
+      <strong>{{ todayEvents$ | async }}</strong>
+    </span>
+  </div>
+
+
+
 </section>
 
 <mat-divider></mat-divider>
 
-<section>
-  <h2 class="subtitle">Cycles</h2>
-  <app-cycles-table></app-cycles-table>
-</section>
+<button mat-button class="cycles-toggle" (click)="toggleTable()">
+  Selecione ciclos <span class="optional">(opcional)</span>
+  <mat-icon class="arrow" [class.open]="tableOpen">expand_more</mat-icon>
+</button>
 
+<app-cycles-table *ngIf="tableOpen" ></app-cycles-table>
 
 <mat-divider></mat-divider>
 
-<section >
-  <h2 class="subtitle">Events Projection</h2>
+<section class="forecast">
+  <h3>Previsão de eventos futuros</h3>
+  <p>
+    A previsão inclui eventos dos ciclos relacionados às entidades e é
+    atualizada sempre que novas entidades forem iniciadas.
+  </p>
+
   <app-projection-chart></app-projection-chart>
 </section>
 
-<mat-dialog-actions align="end">
-  <button mat-stroked-button (click)="close()">Close</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="start()"
-    [disabled]="(store.selectedCycles$ | async)?.length === 0"
-  >
-    Start
+<mat-dialog-actions class="actions">
+  <button mat-stroked-button>Fechar</button>
+  <button mat-raised-button class="green"  [disabled]="startDisabled$ | async">
+    Iniciar novas entidades
   </button>
 </mat-dialog-actions>

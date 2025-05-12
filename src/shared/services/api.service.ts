@@ -1,12 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { delay, of } from 'rxjs';
 import { ApiResponse } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private http = inject(HttpClient);
-
   getProjection() {
     const mock: ApiResponse = {
       "eventsProjection": [
@@ -266,11 +263,52 @@ export class ApiService {
               "follows": 9
             }
           ]
-        }
+        },
+         {
+          "name": "Ciclo 6",
+          "availableEntities": 0,
+          "priority": "HIGH",
+          "structure": [
+            {
+              "day": 1,
+              "meetings": 0,
+              "emails": 0,
+              "calls": 0,
+              "follows": 0
+            },
+            {
+              "day": 2,
+              "meetings": 0,
+              "emails": 0,
+              "calls": 0,
+              "follows": 0
+            },
+            {
+              "day": 3,
+              "meetings": 0,
+              "emails": 0,
+              "calls": 0,
+              "follows": 0
+            },
+            {
+              "day": 4,
+              "meetings": 0,
+              "emails": 0,
+              "calls": 0,
+              "follows": 0
+            },
+            {
+              "day": 5,
+              "meetings": 0,
+              "emails": 0,
+              "calls": 0,
+              "follows": 0
+            }
+          ]
+        },
       ]
     }
 
     return of(mock).pipe(delay(500));
   }
 }
-

@@ -1,36 +1,92 @@
-<ng-container *ngIf="vm$ | async as vm">
-  <table mat-table [dataSource]="vm.cycles" class="mat-elevation-z1">
-
-    <!-- Checkbox -->
+<div *ngIf="vm$ | async as vm" class="cycles-wrapper">
+  <div class="table-header-title">
+    <span>Ciclos com entidades disponíveis ({{ vm.available.length }})</span>
+  </div>
+  <table mat-table [dataSource]="vm.available" class="mat-elevation-z0 cycles-mat-table">
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let c">
+      <td mat-cell *matCellDef="let cycle">
         <mat-checkbox
-          [checked]="isSelected(c, vm.selected)"
-          (change)="toggle(c)"
+          class="custom-green-checkbox"
+          [checked]="cycle.isSelected"
+          (change)="toggle(cycle)"
+          [disabled]="!cycle.availableEntities"
         ></mat-checkbox>
       </td>
     </ng-container>
 
-    <!-- Name -->
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
-      <td mat-cell *matCellDef="let c">{{ c.name }}</td>
-    </ng-container>
-
-    <!-- Priority -->
     <ng-container matColumnDef="priority">
-      <th mat-header-cell *matHeaderCellDef>Priority</th>
-      <td mat-cell *matCellDef="let c">{{ c.priority }}</td>
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let cycle">
+        <mat-icon
+          class="arrow"
+          [ngStyle]="{ color: priorityColor(cycle.priority) }"
+          fontIcon="arrow_upward"
+        ></mat-icon>
+      </td>
     </ng-container>
 
-    <!-- Available -->
-    <ng-container matColumnDef="available">
-      <th mat-header-cell *matHeaderCellDef>Available</th>
-      <td mat-cell *matCellDef="let c">{{ c.availableEntities }}</td>
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let cycle">
+        <span class="name">{{ cycle.name }}</span>
+      </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns"></tr>
+    <ng-container matColumnDef="count">
+      <th mat-header-cell *matHeaderCellDef>Entidades</th>
+      <td mat-cell *matCellDef="let cycle">
+        <span class="count">
+          {{ cycle.isSelected ? 1 : 0 }}/{{ cycle.availableEntities }}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="eventsToday">
+      <th mat-header-cell *matHeaderCellDef>Eventos Hoje</th>
+      <td mat-cell *matCellDef="let cycle">
+        <span class="events">{{ cycle.eventsToday }}</span>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedAvailableColumns; sticky: true"></tr>
+    <tr
+      mat-row
+      *matRowDef="let cycle; columns: displayedAvailableColumns"
+      [class.disabled]="!cycle.availableEntities"
+    ></tr>
   </table>
-</ng-container>
+
+  <div class="table-header-title unavailable-header">
+    <span>Ciclos sem entidades disponíveis ({{ vm.unavailable.length }})</span>
+  </div>
+  <table mat-table [dataSource]="vm.unavailable" class="mat-elevation-z0 cycles-mat-table">
+    <ng-container matColumnDef="selectDisabled">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let cycle">
+        <mat-checkbox disabled></mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="priority">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let cycle">
+        <mat-icon
+          class="arrow"
+          [ngStyle]="{ color: priorityColor(cycle.priority) }"
+          fontIcon="arrow_upward"
+        ></mat-icon>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let cycle">
+        <span class="name">{{ cycle.name }}</span>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedUnavailableColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let cycle; columns: displayedUnavailableColumns" class="disabled"></tr>
+  </table>
+</div>

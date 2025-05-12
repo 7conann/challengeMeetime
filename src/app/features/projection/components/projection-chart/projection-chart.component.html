@@ -1,6 +1,7 @@
 <apx-chart
+  #chart
   [series]="(series$ | async) ?? []"
-  [chart]="chart"
+  [chart]="chartOptions"
   [xaxis]="xaxis"
   [yaxis]="yaxis"
   [legend]="legend"
