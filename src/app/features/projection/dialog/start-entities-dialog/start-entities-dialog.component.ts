@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -11,7 +11,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { map } from 'rxjs';
+import { map, Subject, takeUntil } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { CyclesTableComponent } from '../../components/cycles-table/cycles-table.component';
@@ -38,13 +38,14 @@ import { ProjectionStore } from '../../stores/projection.store';
   ],
   providers: [ProjectionStore],
 })
-export class StartEntitiesDialogComponent {
+export class StartEntitiesDialogComponent implements OnInit, OnDestroy {
   tableOpen = false;
   maxEntities = 0;
 
   private readonly snackBar = inject(MatSnackBar);
+  private readonly store = inject(ProjectionStore);
+  private readonly destroy$ = new Subject<void>();
 
-  readonly store = inject(ProjectionStore);
   readonly todayEvents$ = this.store.todayEvents$;
 
   readonly entitiesCtrl = new FormControl(1, {
@@ -57,26 +58,73 @@ export class StartEntitiesDialogComponent {
   );
 
   readonly maxEntities$ = this.store.selectedCycles$.pipe(
-    map((cycles) => cycles.reduce((sum, cycle) => sum + cycle.availableEntities, 0))
+    map((cycles) => cycles.reduce((sum, cycle) => sum + cycle.availableEntities, 0)),
+    takeUntil(this.destroy$)
   );
 
   toggleTable() {
     this.tableOpen = !this.tableOpen;
   }
 
-  constructor() {
-    this.store.selectedCycles$.subscribe((cycles) => {
-      this.maxEntities = cycles.reduce((sum, cycle) => sum + cycle.availableEntities, 0);
-      this.entitiesCtrl.addValidators(Validators.max(this.maxEntities));
-      this.entitiesCtrl.updateValueAndValidity();
+  ngOnInit(): void {
+    this.maxEntities$.subscribe((newMaxEntities) => {
+      this.maxEntities = newMaxEntities;
+      const currentValidators = [Validators.min(1)];
+
+      if (newMaxEntities > 0) {
+        currentValidators.push(Validators.max(newMaxEntities));
+        if (this.entitiesCtrl.disabled) {
+          this.entitiesCtrl.enable({ emitEvent: false });
+        }
+      } else {
+        currentValidators.push(Validators.max(0));
+        if (this.entitiesCtrl.enabled) {
+          this.entitiesCtrl.disable({ emitEvent: false });
+        }
+      }
+      this.entitiesCtrl.setValidators(currentValidators);
+      this.entitiesCtrl.updateValueAndValidity({ emitEvent: false });
+
+      let valueToSet = this.entitiesCtrl.value;
+
+      if (this.entitiesCtrl.enabled) {
+        if (valueToSet < 1) {
+          valueToSet = 1;
+        }
+        if (valueToSet > newMaxEntities) {
+          valueToSet = newMaxEntities;
+        }
+      } else {
+        valueToSet = 0;
+      }
+
+      if (this.entitiesCtrl.value !== valueToSet) {
+        this.entitiesCtrl.setValue(valueToSet, { emitEvent: false });
+      }
+      this.store.setEntities(valueToSet);
     });
   }
 
-  updateEntities(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = Number(input.value);
-    if (value > this.maxEntities) {
-      this.entitiesCtrl.setErrors({ max: true });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  updateEntities(event: Event): void {
+    if (this.entitiesCtrl.disabled) {
+      return;
+    }
+
+    const inputElement = event.target as HTMLInputElement;
+    const numericValue = Number(inputElement.value);
+    let correctedValue = numericValue;
+
+    if (isNaN(numericValue) || numericValue < 1) {
+      correctedValue = 1;
+    }
+
+    if (correctedValue > this.maxEntities) {
+      correctedValue = this.maxEntities;
       this.snackBar.open(
         `O valor não pode exceder ${this.maxEntities}.`,
         'Fechar',
@@ -86,14 +134,12 @@ export class StartEntitiesDialogComponent {
           verticalPosition: 'top',
         }
       );
-      return;
     }
 
-    if (value > this.maxEntities) {
-      this.entitiesCtrl.setErrors({ max: true });
-      return;
+    if (String(correctedValue) !== inputElement.value) {
+      this.entitiesCtrl.setValue(correctedValue, { emitEvent: false });
     }
-    this.store.setEntities(value);
+
+    this.store.setEntities(correctedValue);
   }
-
 }
