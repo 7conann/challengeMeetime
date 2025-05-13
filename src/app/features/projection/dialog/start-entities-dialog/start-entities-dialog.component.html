@@ -35,9 +35,10 @@
 
 <mat-divider></mat-divider>
 
-<button mat-button class="cycles-toggle" (click)="toggleTable()">
-  Selecione ciclos <span class="optional">(opcional)</span>
-  <mat-icon class="arrow" [class.open]="tableOpen">expand_more</mat-icon>
+<button mat-button class="cycles-toggle" (click)="toggleTable()" color="primary">
+    <mat-icon class="arrow" [class.open]="tableOpen">expand_more</mat-icon>
+
+   Ciclos
 </button>
 
 <app-cycles-table *ngIf="tableOpen" ></app-cycles-table>
