@@ -4,11 +4,8 @@ Este projeto é uma solução para o desafio de desenvolvimento front-end propos
 
 ## Demonstração da Usabilidade
 
-<!--
-  INSTRUÇÃO: Insira seu GIF aqui.
-  Exemplo:
-  ![Demonstração da Aplicação](link_para_seu_gif.gif)
--->
+![Animação](https://github.com/user-attachments/assets/1628b512-5d98-46fa-8033-275d31966196)
+
 
 ## Tecnologias Utilizadas
 
