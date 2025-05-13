@@ -1,22 +1,8 @@
-// src/app/features/projection/stores/projection.store.ts
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-  switchMap,
-  tap,
-  catchError,
-  map,
-  shareReplay,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { switchMap, tap, catchError, map, shareReplay, distinctUntilChanged,} from 'rxjs/operators';
 import { combineLatest, EMPTY } from 'rxjs';
-
-import {
-  ApiResponse,
-  Cycle,
-  EventBreakdown,
-  ProjectionDay,
-} from '../../../../shared/models/api.models';
+import { ApiResponse, Cycle, EventBreakdown, ProjectionDay,} from '../../../../shared/models/api.models';
 import { addBusinessDays, isWeekend } from 'date-fns';
 import { ApiService } from '../../../../shared/services/api.service';
 
@@ -40,7 +26,7 @@ export class ProjectionStore extends ComponentStore<ProjectionState> {
     return this.get().selectedCycles;
   }
 
-    readonly data$            = this.select((s) => s.data);
+    readonly data$ = this.select((s) => s.data);
     readonly selectedCycles$  = this.select((s) => s.selectedCycles);
     readonly entitiesToStart$ = this.select((s) => s.entitiesToStart);
 
@@ -168,7 +154,7 @@ export function nextBusinessDays(n: number): Date[] {
   return list;
 }
 
-function distributeEntities(cycles: Cycle[], entities: number): Map<string, number> {
+export function distributeEntities(cycles: Cycle[], entities: number): Map<string, number> {
   const result = new Map<string, number>();
 
   if (!cycles || cycles.length === 0 || entities === 0) {

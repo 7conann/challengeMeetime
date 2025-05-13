@@ -1,4 +1,3 @@
-// src/app/app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes }        from './app.routes';
@@ -9,7 +8,7 @@ import { provideAnimations }  from '@angular/platform-browser/animations';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),   // ← HttpClient para o ApiService
-    provideAnimations(),   // ← necessário p/ Angular Material
+    provideHttpClient(),
+    provideAnimations(),
   ],
 };

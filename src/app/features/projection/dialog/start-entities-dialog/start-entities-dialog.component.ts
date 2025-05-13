@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { map } from 'rxjs';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // Importar MatSnackBar e MatSnackBarModule
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { CyclesTableComponent } from '../../components/cycles-table/cycles-table.component';
 import { ProjectionChartComponent } from '../../components/projection-chart/projection-chart.component';
@@ -42,7 +42,7 @@ export class StartEntitiesDialogComponent {
   tableOpen = false;
   maxEntities = 0;
 
-  private readonly snackBar = inject(MatSnackBar); // Injetar MatSnackBar
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly store = inject(ProjectionStore);
   readonly todayEvents$ = this.store.todayEvents$;

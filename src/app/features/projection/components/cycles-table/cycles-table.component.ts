@@ -3,15 +3,18 @@ import { CommonModule } from '@angular/common';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { combineLatest, map, Observable } from 'rxjs'; // Adicionado Observable
+import { combineLatest, map, Observable } from 'rxjs';
 
-import { ProjectionStore } from '../../stores/projection.store';
+import { ProjectionStore, distributeEntities } from '../../stores/projection.store';
 import { Cycle } from '../../../../../shared/models/api.models';
 import { ProjectionChartComponent } from '../projection-chart/projection-chart.component';
 import { buildChartSeries, nextBusinessDays } from '../../stores/projection.store';
 
-// Tipo estendido para itens da tabela, incluindo eventsToday e isSelected
-type CycleInTable = Cycle & { eventsToday: number; isSelected: boolean };
+type CycleInTable = Cycle & {
+  eventsToday: number;
+  isSelected: boolean;
+  allocatedEntities: number;
+};
 
 @Component({
   standalone: true,
@@ -28,6 +31,7 @@ type CycleInTable = Cycle & { eventsToday: number; isSelected: boolean };
 export class CyclesTableComponent {
 
   private store = inject(ProjectionStore);
+  private entitiesToStart$ = this.store.entitiesToStart$;
 
   @ViewChild(ProjectionChartComponent) chartComponent!: ProjectionChartComponent;
 
@@ -38,7 +42,14 @@ export class CyclesTableComponent {
     map((d) => d?.cycles ?? []),
     map((arr) =>
       arr.map((c) => {
-        const todayStruct = c.structure.find((s) => s.day === 1); // Mantendo a lógica original para eventsToday
+        const todayActual = new Date();
+        let todayWeekday = todayActual.getDay();
+
+        if (todayWeekday === 0 || todayWeekday === 6) {
+          todayWeekday = 1;
+        }
+
+        const todayStruct = c.structure.find((s) => s.day === todayWeekday);
         const eventsToday =
           (todayStruct?.meetings ?? 0) +
           (todayStruct?.emails ?? 0) +
@@ -53,15 +64,19 @@ export class CyclesTableComponent {
 
   vm$ = combineLatest([
     this.baseCyclesWithEventsToday$,
-    this.selectedCyclesFromStore$
+    this.selectedCyclesFromStore$,
+    this.entitiesToStart$
   ]).pipe(
-    map(([cycles, selectedCyclesArray]) => {
-      const cyclesWithSelectionState: CycleInTable[] = cycles.map(c => ({
+    map(([allCyclesWithEvents, selectedCyclesArray, entitiesToStartValue]) => {
+      const distributedEntitiesMap = distributeEntities(selectedCyclesArray, entitiesToStartValue);
+
+      const cyclesWithFullState: CycleInTable[] = allCyclesWithEvents.map(c => ({
         ...c,
-        isSelected: selectedCyclesArray.some(sc => sc.name === c.name)
+        isSelected: selectedCyclesArray.some(sc => sc.name === c.name),
+        allocatedEntities: distributedEntitiesMap.get(c.name) ?? 0
       }));
 
-      const sortedCycles = [...cyclesWithSelectionState].sort(
+      const sortedCycles = [...cyclesWithFullState].sort(
         (a, b) =>
           ({ HIGH: 0, MEDIUM: 1, LOW: 2 } as const)[a.priority] -
           ({ HIGH: 0, MEDIUM: 1, LOW: 2 } as const)[b.priority]
@@ -76,7 +91,6 @@ export class CyclesTableComponent {
 
   toggle(cycle: Cycle) {
     this.store.toggleCycle(cycle);
-
     const data = this.store.getData()?.eventsProjection ?? [];
     const selectedCycles = this.store.getSelectedCycles();
     const entities = this.store.getEntitiesToStart();

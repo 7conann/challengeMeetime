@@ -34,12 +34,8 @@
     </ng-container>
 
     <ng-container matColumnDef="count">
-      <th mat-header-cell *matHeaderCellDef>Entidades</th>
-      <td mat-cell *matCellDef="let cycle">
-        <span class="count">
-          {{ cycle.isSelected ? 1 : 0 }}/{{ cycle.availableEntities }}
-        </span>
-      </td>
+      <th mat-header-cell *matHeaderCellDef> Entidades </th>
+      <td mat-cell *matCellDef="let cycle"> {{cycle.allocatedEntities}} / {{cycle.availableEntities}} </td>
     </ng-container>
 
     <ng-container matColumnDef="eventsToday">
